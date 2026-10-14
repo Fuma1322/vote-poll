@@ -2,10 +2,6 @@
 
 import { Vote, Clock3, ShieldCheck } from 'lucide-react';
 
-interface VotingInProgressProps {
-  onBackToLogin: () => void;
-}
-
 export default function VotingInProgress() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-4 py-10">
