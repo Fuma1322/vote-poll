@@ -91,8 +91,8 @@ export default function VotingDisclaimer({
               <div>
                 <h3 className="font-bold text-[#111111]">3. Review your choice carefully</h3>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
-                  Check the candidate's name before confirming your vote. Once submitted, your vote
-                  may not be changed.
+                  Check the candidate&apos;s name before confirming your vote. Once submitted, your
+                  vote may not be changed.
                 </p>
               </div>
             </div>

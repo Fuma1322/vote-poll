@@ -1,12 +1,12 @@
 'use client';
 
-import { ArrowLeft, Vote, Clock3, ShieldCheck } from 'lucide-react';
+import { Vote, Clock3, ShieldCheck } from 'lucide-react';
 
 interface VotingInProgressProps {
   onBackToLogin: () => void;
 }
 
-export default function VotingInProgress({ onBackToLogin }: VotingInProgressProps) {
+export default function VotingInProgress() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-4 py-10">
       <section className="w-full max-w-xl rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-xl shadow-black/5 sm:p-10">

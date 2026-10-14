@@ -10,12 +10,7 @@ type LoginFormProps = {
   error?: string;
 };
 
-export default function LoginForm({
-  onSubmit,
-  onRegisterClick,
-  loading = false,
-  error,
-}: LoginFormProps) {
+export default function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

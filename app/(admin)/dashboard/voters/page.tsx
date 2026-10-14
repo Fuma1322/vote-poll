@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, Clock3, RefreshCw, Trophy, Users, Vote } from 'lucide-react';
+import { Activity, Clock3, RefreshCw, Trophy, Vote } from 'lucide-react';
 
 type CandidateResult = {
   id: string;
@@ -299,38 +299,5 @@ export default function VoterStatisticsPage() {
         </footer>
       </div>
     </main>
-  );
-}
-
-function SummaryCard({
-  icon,
-  label,
-  value,
-  detail,
-  compact = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  detail: string;
-  compact?: boolean;
-}) {
-  return (
-    <div className="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="flex items-center gap-2 text-gray-500">
-        <span className="text-[#168A40]">{icon}</span>
-        <span className="text-xs font-semibold sm:text-sm">{label}</span>
-      </div>
-
-      <p
-        className={`mt-3 break-words font-extrabold tracking-tight ${
-          compact ? 'text-lg sm:text-xl' : 'text-3xl sm:text-4xl'
-        }`}
-      >
-        {value}
-      </p>
-
-      <p className="mt-1 text-xs leading-5 text-gray-500 sm:text-sm">{detail}</p>
-    </div>
   );
 }

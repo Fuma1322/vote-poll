@@ -123,11 +123,6 @@ export default function Home() {
     setScreen('login');
   }
 
-  function goToVotingInProgress() {
-    setSelectedCandidate(null);
-    setScreen('voting-in-progress');
-  }
-
   return (
     <main className="min-h-screen bg-white">
       {screen === 'login' && (
@@ -208,7 +203,7 @@ export default function Home() {
         />
       )}
 
-      {screen === 'voting-in-progress' && <VotingInProgress onBackToLogin={returnToLogin} />}
+      {screen === 'voting-in-progress' && <VotingInProgress />}
 
       {screen === 'voting' && selectedCandidate && (
         <div
