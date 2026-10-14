@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { CheckCircle2, LockKeyhole, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
 
 import LoginForm from '@/components/auth/Login';
 import RegisterForm, {
@@ -10,8 +10,11 @@ import RegisterForm, {
 } from '@/components/auth/Register';
 import Hero, { type Candidate } from '@/components/voting/Hero';
 import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
+import VotingInProgress from '@/components/voting/VotingInProgress';
+import Link from 'next/link';
 
-type Screen = 'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended';
+type Screen =
+  'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
 
 type DemoVoter = {
   email: string;
@@ -22,18 +25,18 @@ type DemoVoter = {
 // Temporary accounts for frontend testing only.
 const demoVoters: DemoVoter[] = [
   {
-    email: 'leonardfuma26@gmail.com',
-    fullName: 'Dr. Tankiso Fuma',
+    email: 'mabelalehloenya@gmail.com',
+    fullName: 'Dr. Mabela Lehloenya',
     role: 'DOCTOR',
   },
   {
-    email: 'lemohangmakintane57@gmail.com',
-    fullName: 'Lemohang Makintane',
+    email: 'thatoramokotjo@gmail.com',
+    fullName: 'Dr. Thato Ramokotjo',
     role: 'PHARMACIST',
   },
   {
-    email: 'dentist@hospital.org',
-    fullName: 'Dr. Napo Mokhele',
+    email: 'malefetsanekasane@gmail.com',
+    fullName: 'Dr. Malefetsane Kasane',
     role: 'DENTIST',
   },
 ];
@@ -47,7 +50,6 @@ export default function Home() {
   const [loginError, setLoginError] = useState('');
   const [registerMessage, setRegisterMessage] = useState('');
   const [registerError, setRegisterError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   // Demo countdown. Production expiry must be enforced by the server.
   useEffect(() => {
@@ -69,9 +71,9 @@ export default function Home() {
   function handleLogin(data: { email: string; password: string }) {
     setLoginError('');
 
-    // Demo only: never authenticate real users this way.
+    // Demo only: replace with your backend authentication.
     const matchedVoter = demoVoters.find(
-      (item) => item.email.toLowerCase() === data.email.toLowerCase()
+      (item) => item.email.toLowerCase() === data.email.trim().toLowerCase()
     );
 
     if (!matchedVoter || !data.password.trim()) {
@@ -89,8 +91,7 @@ export default function Home() {
     setRegisterError('');
     setRegisterMessage('');
 
-    // The registration form is not connected to a database yet.
-    // Do not present a successful registration until the server saves it.
+    // Demo only: connect this to your backend registration endpoint.
     console.log('Registration form preview:', {
       ...data,
       idNumber: '[redacted in preview]',
@@ -102,7 +103,7 @@ export default function Home() {
   function confirmVote() {
     if (!selectedCandidate || secondsRemaining <= 0) return;
 
-    // UI simulation only. A real vote must be saved by the server first.
+    // Demo only: the backend must save and validate the vote.
     setSelectedCandidate(null);
     setScreen('success');
   }
@@ -116,8 +117,15 @@ export default function Home() {
     setVoter(null);
     setSelectedCandidate(null);
     setLoginError('');
+    setRegisterMessage('');
+    setRegisterError('');
     setSecondsRemaining(120);
     setScreen('login');
+  }
+
+  function goToVotingInProgress() {
+    setSelectedCandidate(null);
+    setScreen('voting-in-progress');
   }
 
   return (
@@ -138,21 +146,22 @@ export default function Home() {
 
       {screen === 'register' && (
         <section className="flex min-h-screen items-center justify-center px-4 py-12">
-          <RegisterForm
-            onSubmit={handleRegister}
-            onBack={() => setScreen('login')}
-            loading={submitting}
-            error={registerError}
-          />
+          <div className="w-full max-w-lg">
+            <RegisterForm
+              onSubmit={handleRegister}
+              onBack={() => setScreen('login')}
+              error={registerError}
+            />
 
-          {registerMessage && (
-            <div
-              role="status"
-              className="fixed bottom-5 left-4 right-4 mx-auto max-w-lg rounded-xl border border-[#25D366]/40 bg-white p-4 text-sm text-[#111111] shadow-lg"
-            >
-              {registerMessage}
-            </div>
-          )}
+            {registerMessage && (
+              <div
+                role="status"
+                className="mt-4 rounded-xl border border-[#25D366]/40 bg-white p-4 text-sm text-[#111111] shadow-sm"
+              >
+                {registerMessage}
+              </div>
+            )}
+          </div>
         </section>
       )}
 
@@ -161,6 +170,7 @@ export default function Home() {
           voterName={voter.fullName}
           onContinue={() => {
             setSecondsRemaining(120);
+            setSelectedCandidate(null);
             setScreen('voting');
           }}
           onCancel={returnToLogin}
@@ -182,21 +192,23 @@ export default function Home() {
           title="Congratulations!"
           description="Your vote has been successfully cast."
           detail="Thank you for participating in the Hospital Committee Election."
-          buttonText="Finish"
+          buttonText="Continue"
           onClick={finishVoting}
         />
       )}
 
       {screen === 'ended' && (
         <StatusScreen
-          icon={<LockKeyhole size={42} />}
-          title="Session ended"
-          description="Your voting session is now closed."
-          detail="Thank you for participating in the hospital committee election."
-          buttonText="Return to login"
-          onClick={returnToLogin}
+          icon={<ShieldCheck size={46} />}
+          title="Session Ended"
+          description="Your two-minute voting session has ended."
+          detail="View the current voting progress across all professional categories."
+          buttonText="View Voting Status"
+          buttonHref="/dashboard"
         />
       )}
+
+      {screen === 'voting-in-progress' && <VotingInProgress onBackToLogin={returnToLogin} />}
 
       {screen === 'voting' && selectedCandidate && (
         <div
@@ -250,7 +262,7 @@ export default function Home() {
                 type="button"
                 onClick={confirmVote}
                 disabled={secondsRemaining <= 0}
-                className="rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-[#111111] hover:bg-[#1fbd59] disabled:opacity-50"
+                className="rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-[#111111] hover:bg-[#1fbd59] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Confirm vote
               </button>
@@ -269,13 +281,15 @@ function StatusScreen({
   detail,
   buttonText,
   onClick,
+  buttonHref,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
   detail: string;
   buttonText: string;
-  onClick: () => void;
+  onClick?: () => void;
+  buttonHref?: string;
 }) {
   return (
     <section className="flex min-h-screen items-center justify-center px-5 py-12 text-center">
@@ -292,13 +306,22 @@ function StatusScreen({
 
         <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-gray-500">{detail}</p>
 
-        <button
-          type="button"
-          onClick={onClick}
-          className="mt-9 w-full max-w-xs rounded-xl bg-[#25D366] px-6 py-3.5 text-sm font-bold text-[#111111] transition hover:bg-[#1fbd59]"
-        >
-          {buttonText}
-        </button>
+        {buttonHref ? (
+          <Link
+            href={buttonHref}
+            className="mt-9 inline-flex w-full max-w-xs items-center justify-center rounded-xl bg-[#25D366] px-6 py-3.5 text-sm font-bold text-[#111111] transition hover:bg-[#1fbd59] focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"
+          >
+            {buttonText}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={onClick}
+            className="mt-9 w-full max-w-xs rounded-xl bg-[#25D366] px-6 py-3.5 text-sm font-bold text-[#111111] transition hover:bg-[#1fbd59] focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"
+          >
+            {buttonText}
+          </button>
+        )}
       </div>
     </section>
   );

@@ -1,228 +1,204 @@
-import { ArrowUpRight, CalendarDays, CheckCircle2, Clock3, CreditCard, Users2 } from 'lucide-react';
+import { Users, UserCheck, UserRound, Stethoscope, Activity } from 'lucide-react';
 
-const stats = [
+const votingStats = [
   {
-    label: 'Total Bookings',
-    value: '48',
-    description: 'All booking requests',
-    icon: CalendarDays,
+    name: 'Doctors',
+    description: 'Medical professionals',
+    total: 120,
+    voted: 86,
+    icon: Stethoscope,
   },
   {
-    label: 'Pending',
-    value: '7',
-    description: 'Need verification',
-    icon: Clock3,
+    name: 'Pharmacists',
+    description: 'Pharmacy professionals',
+    total: 45,
+    voted: 32,
+    icon: Activity,
   },
   {
-    label: 'Paid',
-    value: '34',
-    description: 'Confirmed bookings',
-    icon: CheckCircle2,
-  },
-  {
-    label: 'Customers',
-    value: '41',
-    description: 'Unique customers',
-    icon: Users2,
-  },
-];
-
-const upcomingBookings = [
-  {
-    name: 'Mpho Mokoena',
-    purpose: 'Wedding',
-    date: '24 Sep 2026',
-    time: '10:00 – 16:00',
-    status: 'Paid',
-  },
-  {
-    name: 'Thabiso Molapo',
-    purpose: 'Workshop',
-    date: '26 Sep 2026',
-    time: '08:00 – 13:00',
-    status: 'Paid',
-  },
-  {
-    name: 'Lerato Nthunya',
-    purpose: 'Birthday',
-    date: '27 Sep 2026',
-    time: '14:00 – 18:00',
-    status: 'Pending',
+    name: 'Dentists',
+    description: 'Dental professionals',
+    total: 30,
+    voted: 21,
+    icon: UserRound,
   },
 ];
 
 export default function DashboardPage() {
+  const totalEligible = votingStats.reduce((sum, category) => sum + category.total, 0);
+
+  const totalVoted = votingStats.reduce((sum, category) => sum + category.voted, 0);
+
+  const totalRemaining = totalEligible - totalVoted;
+
+  const overallPercentage = totalEligible > 0 ? Math.round((totalVoted / totalEligible) * 100) : 0;
+
   return (
-    <div className="space-y-8">
-      {/* HEADER */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#047857]">
-            Overview
-          </p>
+    <main className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#168a40]">
+              Election overview
+            </p>
 
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#17201C]">
-            Good morning, Administrator.
-          </h1>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#111111] sm:text-4xl">
+              Voting Dashboard
+            </h1>
 
-          <p className="mt-2 max-w-xl text-sm leading-6 text-[#7A8580]">
-            Here is what&apos;s happening with the TRC Hall today.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-xl border border-[#E4E9E4] bg-white px-3.5 py-2.5">
-          <span className="h-2 w-2 rounded-full bg-[#10B981]" />
-
-          <span className="text-xs font-medium text-[#53605A]">System operational</span>
-        </div>
-      </div>
-
-      {/* STATS */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-
-          return (
-            <div
-              key={stat.label}
-              className="group rounded-2xl border border-[#E4E9E4] bg-white p-5 shadow-[0_6px_25px_rgba(6,78,59,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(6,78,59,0.07)]"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ECFDF5] text-[#047857]">
-                  <Icon size={19} strokeWidth={1.8} />
-                </div>
-
-                <ArrowUpRight
-                  size={16}
-                  className="text-[#B1BBB6] transition group-hover:text-[#047857]"
-                />
-              </div>
-
-              <p className="mt-5 text-2xl font-bold tracking-tight text-[#17201C]">{stat.value}</p>
-
-              <p className="mt-1 text-xs font-semibold text-[#53605A]">{stat.label}</p>
-
-              <p className="mt-1 text-[10px] text-[#9AA49F]">{stat.description}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ATTENTION CARD */}
-      <div className="rounded-2xl border border-[#FDE7C2] bg-[#FFFBF4] p-5 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FEF3C7] text-[#B45309]">
-              <CreditCard size={18} />
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-[#17201C]">
-                7 bookings need payment verification
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-[#7A8580]">
-                Review the submitted M-Pesa codes before confirming these bookings.
-              </p>
-            </div>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+              Follow voter participation across Doctors, Pharmacists, and Dentists in the hospital
+              election.
+            </p>
           </div>
 
-          <a
-            href="/dashboard/bookings?status=pending"
-            className="inline-flex items-center justify-center rounded-xl bg-[#064E3B] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#053F30]"
-          >
-            Review bookings
-          </a>
-        </div>
-      </div>
-
-      {/* LOWER GRID */}
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        {/* UPCOMING BOOKINGS */}
-        <div className="rounded-2xl border border-[#E4E9E4] bg-white">
-          <div className="flex items-center justify-between border-b border-[#E8ECE9] px-5 py-4 sm:px-6">
-            <div>
-              <p className="text-sm font-bold text-[#17201C]">Upcoming bookings</p>
-
-              <p className="mt-1 text-[10px] text-[#9AA49F]">Confirmed and pending events</p>
-            </div>
-
-            <a
-              href="/dashboard/bookings"
-              className="text-[11px] font-semibold text-[#047857] hover:underline"
-            >
-              View all
-            </a>
-          </div>
-
-          <div className="divide-y divide-[#EEF1EF]">
-            {upcomingBookings.map((booking) => (
-              <div
-                key={`${booking.name}-${booking.date}`}
-                className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-[#26332D]">{booking.name}</p>
-
-                  <p className="mt-1 text-[11px] text-[#8A958F]">
-                    {booking.purpose} · {booking.date}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="text-[11px] font-medium text-[#66736C]">{booking.time}</span>
-
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[9px] font-semibold ${
-                      booking.status === 'Paid'
-                        ? 'bg-[#ECFDF5] text-[#047857]'
-                        : 'bg-[#FFF7E8] text-[#B45309]'
-                    }`}
-                  >
-                    {booking.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-sm font-semibold text-[#168a40]">
+            <span className="h-2 w-2 rounded-full bg-[#25D366]" />
+            Voting in progress
           </div>
         </div>
 
-        {/* QUICK ACTIONS */}
-        <div className="rounded-2xl border border-[#E4E9E4] bg-white p-5 sm:p-6">
-          <p className="text-sm font-bold text-[#17201C]">Quick actions</p>
+        {/* Overall election statistics */}
+        <section
+          aria-label="Overall voting statistics"
+          className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        >
+          <SummaryCard
+            label="Eligible voters"
+            value={totalEligible}
+            description="Across all professions"
+            icon={<Users size={22} />}
+          />
 
-          <p className="mt-1 text-[10px] text-[#9AA49F]">Common administration tasks</p>
+          <SummaryCard
+            label="Votes recorded"
+            value={totalVoted}
+            description="Voters who have voted"
+            icon={<UserCheck size={22} />}
+          />
 
-          <div className="mt-5 space-y-2.5">
-            <a
-              href="/dashboard/bookings?status=pending"
-              className="flex items-center justify-between rounded-xl border border-[#E4E9E4] px-4 py-3 transition hover:border-[#A7F3D0] hover:bg-[#F7FCF9]"
-            >
-              <span className="text-xs font-semibold text-[#53605A]">Review pending payments</span>
+          <SummaryCard
+            label="Yet to vote"
+            value={totalRemaining}
+            description="Eligible voters remaining"
+            icon={<UserRound size={22} />}
+          />
 
-              <ArrowUpRight size={15} className="text-[#047857]" />
-            </a>
+          <SummaryCard
+            label="Overall turnout"
+            value={`${overallPercentage}%`}
+            description="Share of eligible voters"
+            icon={<Activity size={22} />}
+          />
+        </section>
 
-            <a
-              href="/calendar"
-              className="flex items-center justify-between rounded-xl border border-[#E4E9E4] px-4 py-3 transition hover:border-[#A7F3D0] hover:bg-[#F7FCF9]"
-            >
-              <span className="text-xs font-semibold text-[#53605A]">View public calendar</span>
-
-              <ArrowUpRight size={15} className="text-[#047857]" />
-            </a>
-
-            <a
-              href="/dashboard/bookings"
-              className="flex items-center justify-between rounded-xl border border-[#E4E9E4] px-4 py-3 transition hover:border-[#A7F3D0] hover:bg-[#F7FCF9]"
-            >
-              <span className="text-xs font-semibold text-[#53605A]">Manage bookings</span>
-
-              <ArrowUpRight size={15} className="text-[#047857]" />
-            </a>
+        {/* Category-level statistics */}
+        <section className="mt-12">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-[#111111] sm:text-2xl">
+              Participation by profession
+            </h2>
+            <p className="mt-2 text-sm text-gray-500">
+              Compare votes recorded with the total eligible voters in each category.
+            </p>
           </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {votingStats.map((category) => {
+              const percentage =
+                category.total > 0 ? Math.round((category.voted / category.total) * 100) : 0;
+
+              const remaining = Math.max(0, category.total - category.voted);
+
+              const Icon = category.icon;
+
+              return (
+                <article
+                  key={category.name}
+                  className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-[#111111]">{category.name}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{category.description}</p>
+                    </div>
+
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#168a40]">
+                      <Icon size={24} />
+                    </div>
+                  </div>
+
+                  <div className="mt-8">
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-gray-500">Votes recorded</p>
+                        <p className="mt-1 text-3xl font-extrabold tabular-nums text-[#111111]">
+                          {category.voted}
+                          <span className="ml-1 text-base font-medium text-gray-400">
+                            / {category.total}
+                          </span>
+                        </p>
+                      </div>
+
+                      <p className="text-lg font-bold tabular-nums text-[#168a40]">{percentage}%</p>
+                    </div>
+
+                    <div
+                      className="mt-4 h-3 overflow-hidden rounded-full bg-gray-100"
+                      role="progressbar"
+                      aria-label={`${category.name} voter turnout`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={percentage}
+                    >
+                      <div
+                        className="h-full rounded-full bg-[#25D366] transition-all duration-700"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
+                      <span className="text-gray-500">Yet to vote</span>
+                      <span className="font-semibold tabular-nums text-[#111111]">{remaining}</span>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <p className="mt-8 text-center text-xs leading-5 text-gray-400">
+          Voting statistics should be verified against the official election records.
+        </p>
+      </div>
+    </main>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  description,
+  icon,
+}: {
+  label: string;
+  value: string | number;
+  description: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-medium text-gray-500">{label}</p>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#168a40]">
+          {icon}
         </div>
       </div>
-    </div>
+
+      <p className="mt-4 text-3xl font-extrabold tracking-tight text-[#111111]">{value}</p>
+
+      <p className="mt-1 text-xs text-gray-500">{description}</p>
+    </article>
   );
 }

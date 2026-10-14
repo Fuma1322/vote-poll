@@ -10,11 +10,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className="bg-[#F7F8F5] text-[#17201C]">
-
-      <main className="min-h-screen">{children}</main>
-
-    </div>
-  );
+  return <div className="bg-[#F7F8F5] text-[#17201C]">{children}</div>;
 }
