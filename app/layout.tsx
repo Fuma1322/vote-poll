@@ -18,7 +18,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'TRC-SCHEDULER',
+  title: 'TRC Voting Portal',
   description: 'Proudly Powered By MPLUG PTY LTD',
 };
 

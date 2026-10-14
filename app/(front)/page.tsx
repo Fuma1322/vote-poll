@@ -8,10 +8,10 @@ import RegisterForm, {
 } from '@/components/auth/Register';
 import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { fireConfetti } from '@/components/ui/confetti-demo';
 import Hero, { type Candidate } from '@/components/voting/Hero';
 import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
 import VotingInProgress from '@/components/voting/VotingInProgress';
-import { fireConfetti } from '@/components/ui/confetti-demo';
 
 type Screen =
   'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
