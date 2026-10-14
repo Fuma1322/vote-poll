@@ -1,17 +1,16 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
-import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
-
+import Link from 'next/link';
 import LoginForm from '@/components/auth/Login';
 import RegisterForm, {
   type RegisterFormData,
   type ProfessionalRole,
 } from '@/components/auth/Register';
+import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Hero, { type Candidate } from '@/components/voting/Hero';
 import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
 import VotingInProgress from '@/components/voting/VotingInProgress';
-import Link from 'next/link';
 
 type Screen =
   'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
