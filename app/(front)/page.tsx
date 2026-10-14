@@ -11,6 +11,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import Hero, { type Candidate } from '@/components/voting/Hero';
 import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
 import VotingInProgress from '@/components/voting/VotingInProgress';
+import { fireConfetti } from '@/components/ui/confetti-demo';
 
 type Screen =
   'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
@@ -102,7 +103,10 @@ export default function Home() {
   function confirmVote() {
     if (!selectedCandidate || secondsRemaining <= 0) return;
 
-    // Demo only: the backend must save and validate the vote.
+    // Trigger the celebration animation.
+    fireConfetti();
+
+    // UI simulation only — save the vote through your backend in production.
     setSelectedCandidate(null);
     setScreen('success');
   }
