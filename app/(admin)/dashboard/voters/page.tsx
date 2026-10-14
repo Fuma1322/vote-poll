@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, Clock3, RefreshCw, Trophy, Users, Vote } from 'lucide-react';
+import { Activity, Clock3, RefreshCw, Trophy, Vote } from 'lucide-react';
 
 type CandidateResult = {
   id: string;
@@ -98,7 +98,7 @@ export default function VoterStatisticsPage() {
   });
 
   return (
-    <main className="min-h-full bg-[#F5F7F6] p-4 text-[#111111] sm:p-6 xl:p-7">
+    <main className="min-h-full p-4 text-[#111111] sm:p-6 xl:p-7">
       <div className="mx-auto max-w-[1800px]">
         {/* Page heading */}
         <header className="flex flex-wrap items-center justify-between gap-4">
@@ -146,9 +146,6 @@ export default function VoterStatisticsPage() {
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold sm:text-xl">Results by Profession</h2>
-              <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-                Candidate vote counts and share of votes in each category
-              </p>
             </div>
 
             {lastChecked && (
