@@ -9,8 +9,9 @@ import RegisterForm, {
   type ProfessionalRole,
 } from '@/components/auth/Register';
 import Hero, { type Candidate } from '@/components/voting/Hero';
+import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
 
-type Screen = 'login' | 'register' | 'voting' | 'success' | 'ended';
+type Screen = 'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended';
 
 type DemoVoter = {
   email: string;
@@ -81,7 +82,7 @@ export default function Home() {
     setVoter(matchedVoter);
     setSecondsRemaining(120);
     setSelectedCandidate(null);
-    setScreen('voting');
+    setScreen('disclaimer');
   }
 
   function handleRegister(data: RegisterFormData) {
@@ -153,6 +154,17 @@ export default function Home() {
             </div>
           )}
         </section>
+      )}
+
+      {screen === 'disclaimer' && voter && (
+        <VotingDisclaimer
+          voterName={voter.fullName}
+          onContinue={() => {
+            setSecondsRemaining(120);
+            setScreen('voting');
+          }}
+          onCancel={returnToLogin}
+        />
       )}
 
       {screen === 'voting' && voter && (

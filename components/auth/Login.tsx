@@ -114,19 +114,6 @@ export default function LoginForm({
         </button>
       </form>
 
-      {onRegisterClick && (
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Need to register a voter?{' '}
-          <button
-            type="button"
-            onClick={onRegisterClick}
-            className="font-semibold text-[#111111] underline decoration-[#25D366] decoration-2 underline-offset-4 hover:text-[#168a40]"
-          >
-            Register voter
-          </button>
-        </p>
-      )}
-
       <p className="mt-6 text-center text-xs leading-5 text-gray-400">
         Authorized hospital personnel only.
       </p>
