@@ -54,7 +54,7 @@ export default function VotingDashboardLayout({ children }: { children: React.Re
       <aside className="fixed inset-y-0 left-0 z-50 hidden w-[270px] flex-col border-r border-[#E5EAE6] bg-white lg:flex">
         {/* BRAND */}
         <div className="px-6 pb-7 pt-7">
-          <Link href="/dashboard" className="group inline-flex items-center gap-3">
+          <Link href="/" className="group inline-flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#111111] shadow-[0_5px_18px_rgba(17,17,17,0.12)] transition-transform duration-200 group-hover:scale-[1.03]">
               <Vote size={21} className="text-[#25D366]" />
             </div>
@@ -132,7 +132,9 @@ export default function VotingDashboardLayout({ children }: { children: React.Re
 
           <p className="text-[9px] text-[#A0AAA5]">© {new Date().getFullYear()} HospitalVote</p>
 
-          <p className="mt-0.5 text-[9px] font-semibold text-[#168a40]">Secure Election System</p>
+          <p className="mt-0.5 text-[12px] font-semibold text-[#168a40]">
+            Build By: MPlug (Pty) Ltd
+          </p>
         </div>
       </aside>
 

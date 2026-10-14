@@ -37,7 +37,7 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
       </div>
 
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Welcome back</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[#111111]">Welcome</h1>
         <p className="mt-2 text-sm text-gray-500">Sign in to access the hospital voting portal.</p>
       </div>
 

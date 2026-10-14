@@ -1,9 +1,4 @@
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Voting | TRC',
-  description: 'Voting Poll for TRC',
-};
+import React from 'react';
 
 export default function RootLayout({
   children,
