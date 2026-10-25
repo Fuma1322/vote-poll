@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import LoginForm from '@/components/auth/Login';
 import RegisterForm, {
   type RegisterFormData,
@@ -16,34 +17,23 @@ import VotingInProgress from '@/components/voting/VotingInProgress';
 type Screen =
   'login' | 'register' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
 
-type DemoVoter = {
-  email: string;
+type AuthUser = {
+  id: string;
   fullName: string;
-  role: ProfessionalRole;
+  email: string;
+  registrationNumber: string | null;
+  professionalCategory: ProfessionalRole | null;
+  role: 'ADMIN' | 'VOTER';
+  mustChangePassword: boolean;
 };
 
-// Temporary accounts for frontend testing only.
-const demoVoters: DemoVoter[] = [
-  {
-    email: 'mabelalehloenya@gmail.com',
-    fullName: 'Dr. Mabela Lehloenya',
-    role: 'DOCTOR',
-  },
-  {
-    email: 'thatoramokotjo@gmail.com',
-    fullName: 'Dr. Thato Ramokotjo',
-    role: 'PHARMACIST',
-  },
-  {
-    email: 'malefetsanekasane@gmail.com',
-    fullName: 'Dr. Malefetsane Kasane',
-    role: 'DENTIST',
-  },
-];
-
 export default function Home() {
+  const router = useRouter();
+
   const [screen, setScreen] = useState<Screen>('login');
-  const [voter, setVoter] = useState<DemoVoter | null>(null);
+  const [voter, setVoter] = useState<AuthUser | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const [secondsRemaining, setSecondsRemaining] = useState(120);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
@@ -68,23 +58,73 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [screen, secondsRemaining]);
 
-  function handleLogin(data: { email: string; password: string }) {
+  async function handleLogin(data: { email: string; password: string }) {
     setLoginError('');
+    setLoginLoading(true);
 
-    // Demo only: replace with your backend authentication.
-    const matchedVoter = demoVoters.find(
-      (item) => item.email.toLowerCase() === data.email.trim().toLowerCase()
-    );
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          email: data.email.trim().toLowerCase(),
+          password: data.password,
+        }),
+      });
 
-    if (!matchedVoter || !data.password.trim()) {
-      setLoginError('Demo account not found. Try one of the sample email addresses.');
-      return;
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+            result?.error ||
+            'Unable to sign in. Please check your email and password.'
+        );
+      }
+
+      const user = result?.user as AuthUser | undefined;
+
+      if (!user?.id || !user?.role) {
+        throw new Error('The server returned an invalid user response.');
+      }
+
+      // Administrators should use the administration dashboard.
+      if (user.role === 'ADMIN') {
+        router.push('/dashboard');
+        return;
+      }
+
+      // Force users to change their temporary password first.
+      if (user.mustChangePassword) {
+        router.push('/change-password');
+        return;
+      }
+
+      // Voters must have an assigned professional category.
+      if (
+        !user.professionalCategory ||
+        !['DOCTOR', 'DENTIST', 'PHARMACIST'].includes(user.professionalCategory)
+      ) {
+        throw new Error(
+          'Your account has no valid professional category. Please contact the administrator.'
+        );
+      }
+
+      setVoter(user);
+      setSecondsRemaining(120);
+      setSelectedCandidate(null);
+      setScreen('disclaimer');
+    } catch (error) {
+      setLoginError(
+        error instanceof Error ? error.message : 'Unable to connect to the authentication service.'
+      );
+    } finally {
+      setLoginLoading(false);
     }
-
-    setVoter(matchedVoter);
-    setSecondsRemaining(120);
-    setSelectedCandidate(null);
-    setScreen('disclaimer');
   }
 
   function handleRegister(data: RegisterFormData) {
@@ -137,6 +177,7 @@ export default function Home() {
               setRegisterMessage('');
               setScreen('register');
             }}
+            loading={loginLoading}
             error={loginError}
           />
         </section>
@@ -177,7 +218,7 @@ export default function Home() {
 
       {screen === 'voting' && voter && (
         <Hero
-          role={voter.role}
+          role={voter.professionalCategory!}
           voterName={voter.fullName}
           secondsRemaining={secondsRemaining}
           onSelectCandidate={setSelectedCandidate}

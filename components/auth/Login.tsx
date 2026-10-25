@@ -4,7 +4,7 @@ import { FormEvent, useState } from 'react';
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
 
 type LoginFormProps = {
-  onSubmit?: (data: { email: string; password: string }) => void;
+  onSubmit: (data: { email: string; password: string }) => void | Promise<void>;
   onRegisterClick?: () => void;
   loading?: boolean;
   error?: string;
@@ -16,16 +16,26 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
   const [showPassword, setShowPassword] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!email.trim() || !password) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
       setValidationError('Please enter your email and password.');
       return;
     }
 
     setValidationError('');
-    onSubmit?.({ email: email.trim(), password });
+
+    try {
+      await onSubmit({
+        email: normalizedEmail,
+        password,
+      });
+    } catch {
+      // The parent login page should handle and display API errors.
+    }
   }
 
   return (
@@ -51,6 +61,7 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
             <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               id="login-email"
+              name="email"
               type="email"
               autoComplete="username"
               placeholder="you@hospital.org"
@@ -58,6 +69,7 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
               onChange={(event) => setEmail(event.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm text-[#111111] outline-none transition placeholder:text-gray-400 focus:border-[#25D366] focus:ring-4 focus:ring-[#25D366]/10"
               required
+              disabled={loading}
             />
           </div>
         </div>
@@ -74,6 +86,7 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
             />
             <input
               id="login-password"
+              name="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               placeholder="Enter your password"
@@ -81,6 +94,7 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
               onChange={(event) => setPassword(event.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-12 text-sm text-[#111111] outline-none transition placeholder:text-gray-400 focus:border-[#25D366] focus:ring-4 focus:ring-[#25D366]/10"
               required
+              disabled={loading}
             />
 
             <button
@@ -88,6 +102,7 @@ export default function LoginForm({ onSubmit, loading = false, error }: LoginFor
               onClick={() => setShowPassword((value) => !value)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#111111]"
+              disabled={loading}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
