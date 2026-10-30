@@ -16,7 +16,7 @@ export default function RegisterPage() {
 
       <div className="relative z-10 flex w-full justify-center">
         <RegisterForm
-          onSubmit={function (data: RegisterFormData): void | Promise<void> {
+          onSubmit={function (): void | Promise<void> {
             throw new Error('Function not implemented.');
           }}
         />
