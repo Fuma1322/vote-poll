@@ -1,4 +1,4 @@
-import RegisterForm from '@/components/auth/Register';
+import RegisterForm, { RegisterFormData } from '@/components/auth/Register';
 
 export default function RegisterPage() {
   return (
@@ -15,7 +15,11 @@ export default function RegisterPage() {
       />
 
       <div className="relative z-10 flex w-full justify-center">
-        <RegisterForm />
+        <RegisterForm
+          onSubmit={function (data: RegisterFormData): void | Promise<void> {
+            throw new Error('Function not implemented.');
+          }}
+        />
       </div>
     </main>
   );
