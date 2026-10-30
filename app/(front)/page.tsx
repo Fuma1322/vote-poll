@@ -2,13 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import LoginForm from '@/components/auth/Login';
-import type { ProfessionalRole } from '@/components/auth/Register';
 import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { fireConfetti } from '@/components/ui/confetti-demo';
-import Hero, { type BallotPosition, type Candidate } from '@/components/voting/Hero';
-import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
+import type { ProfessionalRole } from '@/components/auth/Register';
 import VotingInProgress from '@/components/voting/VotingInProgress';
+import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import Hero, { type BallotPosition, type Candidate } from '@/components/voting/Hero';
 
 type Screen = 'login' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
 
@@ -43,14 +43,16 @@ type BallotResponse = {
 };
 
 type MyElectionResponse = {
-  election: {
+  election?: {
     id: string;
     title: string;
-    description: string | null;
+    description?: string;
     status: string;
-    opensAt: string | null;
-    closesAt: string | null;
+    opensAt?: string;
+    closesAt?: string;
   };
+  error?: string;
+  message?: string;
 };
 
 type SessionResponse = {
@@ -238,9 +240,7 @@ export default function Home() {
       const electionData = await readJson<MyElectionResponse>(electionResponse);
 
       if (!electionResponse.ok) {
-        throw new Error(
-          (electionData as any).error || 'Unable to retrieve your assigned election.'
-        );
+        throw new Error(electionData.error || 'Unable to retrieve your assigned election.');
       }
 
       const election = electionData.election;

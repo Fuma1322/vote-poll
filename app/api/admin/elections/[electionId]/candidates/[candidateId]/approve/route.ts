@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { proxyAdminRequest } from '@/lib/admin-api';
 
 export async function PATCH(
