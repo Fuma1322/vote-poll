@@ -2,15 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Stethoscope,
-  Pill,
-  Activity,
-  Users2,
-  ChevronRight,
-  Vote,
-} from 'lucide-react';
+import { LayoutDashboard, Users2, ChevronRight, Vote, Pen, CalendarDays } from 'lucide-react';
 
 export default function VotingDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,19 +14,14 @@ export default function VotingDashboardLayout({ children }: { children: React.Re
       icon: LayoutDashboard,
     },
     {
-      href: '/dashboard/doctors',
-      label: 'Doctors',
-      icon: Stethoscope,
+      href: '/dashboard/elections',
+      label: 'Elections',
+      icon: CalendarDays,
     },
     {
-      href: '/dashboard/pharmacists',
-      label: 'Pharmacists',
-      icon: Pill,
-    },
-    {
-      href: '/dashboard/dentists',
-      label: 'Dentists',
-      icon: Activity,
+      href: '/dashboard/registry',
+      label: 'Voter Registry',
+      icon: Pen,
     },
     {
       href: '/dashboard/voters',
@@ -43,10 +30,17 @@ export default function VotingDashboardLayout({ children }: { children: React.Re
     },
   ];
 
-  const isActive = (href: string) =>
-    href === '/dashboard'
-      ? pathname === href
-      : pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === href;
+    }
+
+    if (href === '/dashboard/voters') {
+      return pathname === href;
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <div className="min-h-screen text-[#17201C]">

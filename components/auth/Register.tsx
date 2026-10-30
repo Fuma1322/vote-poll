@@ -23,7 +23,7 @@ export type RegisterFormData = {
 };
 
 type RegisterFormProps = {
-  onSubmit?: (data: RegisterFormData) => void;
+  onSubmit: (data: RegisterFormData) => void | Promise<void>;
   onBack?: () => void;
   loading?: boolean;
   error?: string;
@@ -42,8 +42,10 @@ export default function RegisterForm({
   const [role, setRole] = useState<ProfessionalRole>('DOCTOR');
   const [validationError, setValidationError] = useState('');
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (loading) return;
 
     if (!fullName.trim() || !employeeNumber.trim() || !idNumber.trim() || !email.trim()) {
       setValidationError('Please complete all fields.');
@@ -52,7 +54,7 @@ export default function RegisterForm({
 
     setValidationError('');
 
-    onSubmit?.({
+    await onSubmit({
       fullName: fullName.trim(),
       employeeNumber: employeeNumber.trim(),
       idNumber: idNumber.trim(),
@@ -62,13 +64,12 @@ export default function RegisterForm({
   }
 
   const inputClass =
-    'w-full rounded-xl border border-gray-200/90 bg-gray-50/70 py-3.5 pl-11 pr-4 text-sm text-[#111111] placeholder:text-gray-400 outline-none transition duration-200 hover:border-gray-300 focus:border-[#25D366] focus:bg-white focus:ring-4 focus:ring-[#25D366]/10';
+    'w-full rounded-xl border border-gray-200/90 bg-gray-50/70 py-3.5 pl-11 pr-4 text-sm text-[#111111] placeholder:text-gray-400 outline-none transition duration-200 hover:border-gray-300 focus:border-[#25D366] focus:bg-white focus:ring-4 focus:ring-[#25D366]/10 disabled:cursor-not-allowed disabled:opacity-60';
 
   const labelClass = 'mb-2 block text-[13px] font-semibold tracking-wide text-gray-700';
 
   return (
     <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-white/80 bg-white shadow-[0_24px_80px_-24px_rgba(17,17,17,0.18)]">
-      {/* Accent line */}
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#25D366] via-[#25D366] to-emerald-200" />
 
       <div className="p-6 sm:p-9 lg:p-10">
@@ -76,14 +77,14 @@ export default function RegisterForm({
           <button
             type="button"
             onClick={onBack}
-            className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-gray-500 transition hover:text-[#168A40] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
+            disabled={loading}
+            className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-gray-500 transition hover:text-[#168A40] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] disabled:opacity-50"
           >
             <ArrowLeft size={17} />
             Back to login
           </button>
         )}
 
-        {/* Heading */}
         <div className="flex flex-col items-center text-center">
           <div className="relative mb-5">
             <div className="absolute inset-0 scale-125 rounded-2xl bg-[#25D366]/10 blur-xl" />
@@ -109,7 +110,6 @@ export default function RegisterForm({
         <div className="my-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Full name */}
           <div>
             <label htmlFor="fullName" className={labelClass}>
               Full names
@@ -121,21 +121,22 @@ export default function RegisterForm({
               />
               <input
                 id="fullName"
+                name="fullName"
                 autoComplete="name"
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 placeholder="Enter full names"
                 className={inputClass}
+                disabled={loading}
                 required
               />
             </div>
           </div>
 
-          {/* Employee and ID numbers */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="employeeNumber" className={labelClass}>
-                Employee number
+                Employee / registration number
               </label>
               <div className="relative">
                 <Hash
@@ -144,11 +145,13 @@ export default function RegisterForm({
                 />
                 <input
                   id="employeeNumber"
+                  name="employeeNumber"
                   autoComplete="off"
                   value={employeeNumber}
                   onChange={(event) => setEmployeeNumber(event.target.value)}
-                  placeholder="Employee number"
+                  placeholder="e.g. TRC-DOCTOR-010"
                   className={inputClass}
+                  disabled={loading}
                   required
                 />
               </div>
@@ -165,18 +168,19 @@ export default function RegisterForm({
                 />
                 <input
                   id="idNumber"
+                  name="idNumber"
                   autoComplete="off"
                   value={idNumber}
                   onChange={(event) => setIdNumber(event.target.value)}
                   placeholder="National ID number"
                   className={inputClass}
+                  disabled={loading}
                   required
                 />
               </div>
             </div>
           </div>
 
-          {/* Email */}
           <div>
             <label htmlFor="registerEmail" className={labelClass}>
               Email address
@@ -188,18 +192,19 @@ export default function RegisterForm({
               />
               <input
                 id="registerEmail"
+                name="email"
                 type="email"
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="name@hospital.org"
                 className={inputClass}
+                disabled={loading}
                 required
               />
             </div>
           </div>
 
-          {/* Professional role */}
           <div>
             <label htmlFor="professionalRole" className={labelClass}>
               Professional role
@@ -211,9 +216,11 @@ export default function RegisterForm({
               />
               <select
                 id="professionalRole"
+                name="role"
                 value={role}
                 onChange={(event) => setRole(event.target.value as ProfessionalRole)}
                 className={`${inputClass} appearance-none pr-11`}
+                disabled={loading}
               >
                 <option value="DOCTOR">Doctor</option>
                 <option value="PHARMACIST">Pharmacist</option>
@@ -226,17 +233,15 @@ export default function RegisterForm({
             </div>
           </div>
 
-          {/* Security notice */}
           <div className="flex gap-3 rounded-2xl border border-[#25D366]/20 bg-[#25D366]/[0.06] p-4">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#168A40] shadow-sm">
               <LockKeyhole size={17} />
             </div>
-
             <div>
               <p className="text-xs font-bold text-[#111111]">Secure voter registration</p>
               <p className="mt-1 text-xs leading-5 text-gray-600">
-                Only authorized administrators should register voters. Account verification and
-                secure password setup should be handled separately.
+                Registration is restricted to authorized administrators. Temporary passwords must be
+                delivered securely, and voters must change them according to the account policy.
               </p>
             </div>
           </div>

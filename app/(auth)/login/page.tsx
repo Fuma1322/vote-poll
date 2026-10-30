@@ -51,7 +51,7 @@ export default function LoginPage() {
       if (user.role === 'ADMIN') {
         router.replace('/dashboard');
       } else {
-        router.replace('/voting');
+        router.replace('/');
       }
     } catch (err) {
       setError(
