@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import LoginForm from '@/components/auth/Login';
-import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, X, ArrowRight, LockKeyhole, Vote } from 'lucide-react';
 import { fireConfetti } from '@/components/ui/confetti-demo';
 import type { ProfessionalRole } from '@/components/auth/Register';
 import VotingInProgress from '@/components/voting/VotingInProgress';
@@ -10,7 +10,8 @@ import VotingDisclaimer from '@/components/voting/VotingDisclaimer';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import Hero, { type BallotPosition, type Candidate } from '@/components/voting/Hero';
 
-type Screen = 'login' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
+type Screen =
+  'welcome' | 'login' | 'disclaimer' | 'voting' | 'success' | 'ended' | 'voting-in-progress';
 
 type AuthUser = {
   id: string;
@@ -93,7 +94,7 @@ async function readJson<T>(response: Response): Promise<T> {
 export default function Home() {
   const router = useRouter();
 
-  const [screen, setScreen] = useState<Screen>('login');
+  const [screen, setScreen] = useState<Screen>('welcome');
   const [voter, setVoter] = useState<AuthUser | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -149,6 +150,11 @@ export default function Home() {
 
     return () => window.clearInterval(timer);
   }, [screen, sessionExpiresAt, updateCountdown]);
+
+  function enterVotingPortal() {
+    setLoginError('');
+    setScreen('login');
+  }
 
   async function handleLogin(data: { email: string; password: string }) {
     setLoginError('');
@@ -522,9 +528,33 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white">
+      {screen === 'welcome' && <WelcomeScreen onContinue={enterVotingPortal} />}
+
       {screen === 'login' && (
-        <section className="flex min-h-screen items-center justify-center px-4 py-12">
-          <LoginForm onSubmit={handleLogin} loading={loginLoading} error={loginError} />
+        <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#F8FAF9] px-4 py-12">
+          {/* Background decoration */}
+          <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-[#25D366]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-emerald-100 blur-3xl" />
+
+          <div className="relative z-10 w-full max-w-md">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginError('');
+                setScreen('welcome');
+              }}
+              className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[#168a40]"
+            >
+              <ArrowRight className="rotate-180" size={17} />
+              Back to welcome page
+            </button>
+
+            <LoginForm onSubmit={handleLogin} loading={loginLoading} error={loginError} />
+
+            <p className="mt-8 text-center text-xs text-gray-400">
+              Pula Maliboho Healthcare Professionals Voting Portal
+            </p>
+          </div>
         </section>
       )}
 
@@ -742,5 +772,211 @@ function StatusScreen({
         </button>
       </div>
     </section>
+  );
+}
+
+function WelcomeScreen({ onContinue }: { onContinue: () => void }) {
+  return (
+    <main className="relative flex min-h-screen flex-col overflow-hidden bg-white">
+      {/* Decorative background elements */}
+      <div className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-[#25D366]/10 blur-[100px]" />
+
+      <div className="pointer-events-none absolute -bottom-48 -left-40 h-[500px] w-[500px] rounded-full bg-emerald-50 blur-[100px]" />
+
+      {/* Header */}
+      <header className="relative z-10 border-b border-gray-100 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 sm:px-10">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#111111] shadow-lg shadow-black/10">
+              <Vote size={23} className="text-[#25D366]" />
+            </div>
+
+            <div>
+              <p className="text-sm font-extrabold tracking-[0.12em] text-[#111111]">
+                PULA MALIBOHO
+              </p>
+
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-400">
+                Voting Portal
+              </p>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-2 rounded-full border border-green-100 bg-green-50 px-4 py-2 sm:flex">
+            <span className="h-2 w-2 rounded-full bg-[#25D366]" />
+
+            <span className="text-xs font-semibold text-green-800">Official Voting Platform</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main welcome content */}
+      <section className="relative z-10 flex flex-1 items-center px-6 py-16 sm:px-10">
+        <div className="mx-auto grid w-full max-w-7xl items-center gap-14 lg:grid-cols-2 lg:gap-20">
+          {/* Left content */}
+          <div className="mx-auto w-full max-w-xl text-center lg:mx-0 lg:text-left">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#25D366]/20 bg-[#25D366]/10 px-4 py-2">
+              <ShieldCheck size={16} className="text-green-700" />
+
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-green-800">
+                Healthcare Professionals Election
+              </span>
+            </div>
+
+            <h1 className="text-4xl font-black leading-[1.12] tracking-tight text-[#111111] sm:text-5xl lg:text-6xl">
+              Your voice.
+              <br />
+              <span className="text-[#168a40]">Your choice.</span>
+            </h1>
+
+            <h2 className="mt-6 text-xl font-bold tracking-tight text-[#111111] sm:text-2xl">
+              Welcome to Pula Maliboho
+            </h2>
+
+            <p className="mx-auto mt-5 max-w-lg text-sm leading-7 text-gray-500 sm:text-base lg:mx-0">
+              The Healthcare Professionals Voting Portal provides an accessible digital platform for
+              participating in the hospital committee election. Make your voice count and take part
+              in shaping professional representation.
+            </p>
+
+            {/* CTA */}
+            <div className="mt-9 flex flex-col items-center gap-4 lg:items-start">
+              <button
+                type="button"
+                onClick={onContinue}
+                className="group flex w-full max-w-sm items-center justify-center gap-3 rounded-xl bg-[#111111] px-7 py-4 text-sm font-bold text-white shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:bg-[#222222] hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[#25D366]/30"
+              >
+                Enter Voting Portal
+                <ArrowRight
+                  size={19}
+                  className="text-[#25D366] transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </button>
+
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <LockKeyhole size={14} />
+
+                <span>Restricted access for authorised healthcare professionals</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right visual panel */}
+          <div className="relative mx-auto w-full max-w-md">
+            <div className="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-[#25D366]/20 via-transparent to-emerald-100/50 blur-2xl" />
+
+            <div className="relative overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-7 shadow-2xl shadow-gray-200/70 sm:p-10">
+              {/* Top decoration */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
+                    Pula Maliboho
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-[#111111]">
+                    Professional participation
+                  </p>
+                </div>
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25D366]/10">
+                  <ShieldCheck className="text-green-700" size={22} />
+                </div>
+              </div>
+
+              {/* Main illustration */}
+              <div className="my-10 flex justify-center">
+                <div className="relative flex h-48 w-48 items-center justify-center rounded-full border border-[#25D366]/20 bg-[#25D366]/5">
+                  <div className="absolute inset-4 rounded-full border border-dashed border-[#25D366]/40" />
+
+                  <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-[#111111] shadow-2xl shadow-black/20">
+                    <Vote size={55} strokeWidth={1.5} className="text-[#25D366]" />
+                  </div>
+
+                  <div className="absolute -right-1 top-7 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-[#25D366] shadow-lg">
+                    <CheckCircle2 size={19} className="text-[#111111]" />
+                  </div>
+
+                  <div className="absolute -bottom-1 left-5 h-5 w-5 rounded-full border-4 border-white bg-[#168a40]" />
+                </div>
+              </div>
+
+              {/* Feature points */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#25D366]/15">
+                    <ShieldCheck size={20} className="text-green-700" />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-bold text-[#111111]">Secure participation</p>
+
+                    <p className="mt-0.5 text-xs text-gray-400">Authenticated voting access</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#25D366]/15">
+                    <Vote size={20} className="text-green-700" />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-bold text-[#111111]">Your voice matters</p>
+
+                    <p className="mt-0.5 text-xs text-gray-400">
+                      Participate in professional representation
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7 border-t border-gray-100 pt-5 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                  Professionalism · Participation · Representation
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsorship and partnership footer */}
+      <footer className="relative z-10 border-t border-gray-100 bg-[#FAFCFB]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-8 text-center sm:px-10 lg:flex-row lg:text-left">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+              Proudly sponsored by
+            </p>
+
+            <p className="mt-2 text-lg font-black tracking-tight text-[#25d366]">
+              MPlug <span className="font-medium">(Pty) Ltd</span>
+            </p>
+          </div>
+
+          <div className="hidden h-10 w-px bg-gray-200 lg:block" />
+
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+              In partnership with
+            </p>
+
+            <p className="mt-2 text-lg font-black tracking-tight text-[#80461B]">
+              Tranformation Resource Center
+            </p>
+          </div>
+
+          <div className="hidden h-10 w-px bg-gray-200 lg:block" />
+
+          <div>
+            <p className="text-xs font-medium text-gray-500">Pula Maliboho</p>
+
+            <p className="mt-1 text-[11px] text-gray-400">Healthcare Professionals Voting Portal</p>
+
+            <p className="mt-2 text-[10px] text-gray-400">
+              © {new Date().getFullYear()} All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </main>
   );
 }
