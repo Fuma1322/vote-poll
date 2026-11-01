@@ -388,94 +388,88 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              {professionBreakdown.length === 0 ? (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-                  Overall turnout is connected successfully. The backend needs to return{' '}
-                  <code>professionBreakdown</code> before individual profession statistics can be
-                  displayed.
+              {professionBreakdown.length === 0 && (
+                <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  The backend has not returned profession-specific statistics yet. The cards below
+                  will display zero until the breakdown becomes available.
                 </div>
-              ) : (
-                <div className="grid gap-6 lg:grid-cols-3">
-                  {professionConfig.map((category) => {
-                    const stats = professionBreakdown.find(
-                      (item) => item.professionalCategory === category.key
-                    );
+              )}
 
-                    const total = stats?.totalEligibleVoters ?? 0;
+              <div className="grid gap-6 lg:grid-cols-3">
+                {professionConfig.map((category) => {
+                  const stats = professionBreakdown.find(
+                    (item) => item.professionalCategory === category.key
+                  );
 
-                    const voted = stats?.votersWhoVoted ?? 0;
+                  const total = stats?.totalEligibleVoters ?? 0;
+                  const voted = stats?.votersWhoVoted ?? 0;
+                  const remaining = stats?.votersRemaining ?? 0;
 
-                    const remaining = stats?.votersRemaining ?? 0;
+                  const percentage = Math.min(100, Math.max(0, stats?.percentage ?? 0));
 
-                    const percentage = stats?.percentage ?? 0;
+                  const Icon = category.icon;
 
-                    const Icon = category.icon;
+                  return (
+                    <article
+                      key={category.key}
+                      className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-[#111111]">{category.name}</h3>
 
-                    return (
-                      <article
-                        key={category.key}
-                        className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="text-lg font-bold text-[#111111]">{category.name}</h3>
-
-                            <p className="mt-1 text-sm text-gray-500">{category.description}</p>
-                          </div>
-
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#168a40]">
-                            <Icon size={24} />
-                          </div>
+                          <p className="mt-1 text-sm text-gray-500">{category.description}</p>
                         </div>
 
-                        <div className="mt-8">
-                          <div className="flex items-end justify-between gap-3">
-                            <div>
-                              <p className="text-sm text-gray-500">Votes recorded</p>
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#168a40]">
+                          <Icon size={24} />
+                        </div>
+                      </div>
 
-                              <p className="mt-1 text-3xl font-extrabold tabular-nums text-[#111111]">
-                                {voted}
+                      <div className="mt-8">
+                        <div className="flex items-end justify-between gap-3">
+                          <div>
+                            <p className="text-sm text-gray-500">Votes recorded</p>
 
-                                <span className="ml-1 text-base font-medium text-gray-400">
-                                  / {total}
-                                </span>
-                              </p>
-                            </div>
-
-                            <p className="text-lg font-bold tabular-nums text-[#168a40]">
-                              {percentage}%
+                            <p className="mt-1 text-3xl font-extrabold tabular-nums text-[#111111]">
+                              {voted}
+                              <span className="ml-1 text-base font-medium text-gray-400">
+                                / {total}
+                              </span>
                             </p>
                           </div>
 
-                          <div
-                            className="mt-4 h-3 overflow-hidden rounded-full bg-gray-100"
-                            role="progressbar"
-                            aria-label={`${category.name} voter turnout`}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-valuenow={percentage}
-                          >
-                            <div
-                              className="h-full rounded-full bg-[#25D366] transition-all duration-700"
-                              style={{
-                                width: `${Math.min(100, Math.max(0, percentage))}%`,
-                              }}
-                            />
-                          </div>
-
-                          <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
-                            <span className="text-gray-500">Yet to vote</span>
-
-                            <span className="font-semibold tabular-nums text-[#111111]">
-                              {remaining}
-                            </span>
-                          </div>
+                          <p className="text-lg font-bold tabular-nums text-[#168a40]">
+                            {percentage}%
+                          </p>
                         </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
+
+                        <div
+                          className="mt-4 h-3 overflow-hidden rounded-full bg-gray-100"
+                          role="progressbar"
+                          aria-label={`${category.name} voter turnout`}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={percentage}
+                        >
+                          <div
+                            className="h-full rounded-full bg-[#25D366] transition-all duration-700"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4 text-sm">
+                          <span className="text-gray-500">Yet to vote</span>
+
+                          <span className="font-semibold tabular-nums text-[#111111]">
+                            {remaining}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
 
             {/* Last updated */}
