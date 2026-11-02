@@ -1,15 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  AlertCircle,
-  CheckCircle2,
-  Copy,
-  KeyRound,
-  ShieldCheck,
-  UserPlus,
-  Users,
-} from 'lucide-react';
+import { AlertCircle, CheckCircle2, Copy, KeyRound, ShieldCheck, UserPlus } from 'lucide-react';
 
 import RegisterForm, { type RegisterFormData } from '@/components/auth/Register';
 
