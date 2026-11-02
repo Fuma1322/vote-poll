@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const expiresIn = Number(data.expiresIn);
     const maxAge =
-      Number.isFinite(expiresIn) && expiresIn > 0 ? Math.min(Math.floor(expiresIn), 900) : 900;
+      Number.isFinite(expiresIn) && expiresIn > 0 ? Math.min(Math.floor(expiresIn), 86400) : 86400;
 
     const response = NextResponse.json({
       user: data.user,
