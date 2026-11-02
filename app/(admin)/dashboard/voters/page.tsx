@@ -24,10 +24,6 @@ type Election = {
   status: string;
 };
 
-type ElectionsResponse = {
-  elections?: Election[];
-};
-
 type LiveResultsResponse = {
   election: {
     id: string;
