@@ -1,7 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, Copy, UserPlus } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Copy,
+  KeyRound,
+  ShieldCheck,
+  UserPlus,
+  Users,
+} from 'lucide-react';
+
 import RegisterForm, { type RegisterFormData } from '@/components/auth/Register';
 
 type RegistrationResult = {
@@ -17,8 +26,17 @@ type RegistrationResult = {
   temporaryPassword: string;
 };
 
+function getProfessionLabel(category: string) {
+  const labels: Record<string, string> = {
+    DOCTOR: 'Doctor',
+    PHARMACIST: 'Pharmacist',
+    DENTIST: 'Dentist',
+  };
+
+  return labels[category] || category;
+}
+
 export default function RegisterVoterPanel() {
-  const [formOpen, setFormOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<RegistrationResult | null>(null);
@@ -62,7 +80,6 @@ export default function RegisterVoterPanel() {
       }
 
       setResult(payload as RegistrationResult);
-      setFormOpen(false);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Unable to register this voter. Please try again.'
@@ -77,144 +94,205 @@ export default function RegisterVoterPanel() {
 
     try {
       await navigator.clipboard.writeText(result.temporaryPassword);
-      setCopyMessage('Temporary password copied.');
+      setCopyMessage('Temporary password copied successfully.');
     } catch {
       setCopyMessage('Copy failed. Select the password and copy it manually.');
     }
   }
 
+  function resetRegistration() {
+    setResult(null);
+    setError('');
+    setCopyMessage('');
+  }
+
   return (
-    <section className="mt-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#168a40]">
-            <UserPlus size={24} />
-          </div>
-
-          <div>
-            <h2 className="text-xl font-bold text-[#111111]">Register a voter</h2>
-            <p className="mt-1 max-w-xl text-sm leading-6 text-gray-500">
-              Create an account for a doctor, pharmacist, or dentist. The voter will receive a
-              temporary password that must be handled securely.
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setFormOpen((open) => !open);
-            setError('');
-          }}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-bold text-[#111111] transition hover:bg-[#1fbd59]"
-        >
-          <UserPlus size={18} />
-          {formOpen ? 'Close form' : 'Register voter'}
-        </button>
-      </div>
-
-      {formOpen && (
-        <div className="mt-8 border-t border-gray-100 pt-8">
-          <RegisterForm
-            onSubmit={handleRegister}
-            onBack={() => {
-              setFormOpen(false);
-              setError('');
-            }}
-            loading={loading}
-            error={error}
-          />
-        </div>
-      )}
-
-      {error && !formOpen && (
-        <div
-          role="alert"
-          className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          {error}
-        </div>
-      )}
-
-      {result && (
-        <div
-          role="status"
-          className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6"
-        >
-          <div className="flex items-start gap-3">
-            <CheckCircle2 size={24} className="mt-0.5 shrink-0 text-emerald-700" />
+    <div className="min-h-screen bg-[#f8faf9]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        {/* Page heading */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h3 className="font-bold text-gray-900">Voter registered successfully</h3>
-              <p className="mt-1 text-sm leading-6 text-gray-600">
-                {result.voter.full_name}
-                {' · '}
-                {result.voter.email}
-              </p>
-              <p className="mt-1 text-sm text-gray-600">
-                Registration number:{' '}
-                <span className="font-semibold">{result.voter.registration_number}</span>
-              </p>
-              <p className="mt-1 text-sm text-gray-600">
-                Profession:{' '}
-                <span className="font-semibold">{result.voter.professional_category}</span>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#25D366]/20 bg-[#25D366]/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#168a40]">
+                <span className="h-2 w-2 rounded-full bg-[#25D366]" />
+                Voter administration
+              </div>
+
+              <h1 className="text-2xl font-extrabold tracking-tight text-[#111111] sm:text-3xl">
+                Register a new voter
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500 sm:text-base">
+                Create an account for an eligible healthcare professional. Enter their details below
+                to generate their voting portal credentials.
               </p>
             </div>
+
+            <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#25D366]/20 bg-white text-[#168a40] shadow-sm sm:flex">
+              <UserPlus size={27} />
+            </div>
           </div>
+        </div>
 
-          <div className="mt-6">
-            <label
-              htmlFor="temporary-password"
-              className="block text-sm font-semibold text-gray-800"
-            >
-              Temporary password
-            </label>
+        {result ? (
+          /* Registration success */
+          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-100 bg-gradient-to-br from-[#25D366]/10 to-white px-6 py-10 text-center sm:px-10">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#25D366]/15 text-[#168a40]">
+                <CheckCircle2 size={34} />
+              </div>
 
-            <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-              <input
-                id="temporary-password"
-                type="text"
-                readOnly
-                value={result.temporaryPassword}
-                autoComplete="off"
-                className="min-w-0 flex-1 rounded-xl border border-emerald-200 bg-white px-4 py-3 font-mono text-sm text-gray-900"
-              />
+              <h2 className="mt-5 text-2xl font-extrabold text-[#111111]">
+                Voter registered successfully
+              </h2>
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+                The voter account has been created. Review the account details and securely share
+                the temporary password.
+              </p>
+            </div>
+
+            <div className="p-6 sm:p-8">
+              <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-400">
+                Voter account details
+              </h3>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <p className="text-xs font-medium text-gray-400">Full name</p>
+                  <p className="mt-1 font-bold text-gray-900">{result.voter.full_name}</p>
+                </div>
+
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <p className="text-xs font-medium text-gray-400">Profession</p>
+                  <p className="mt-1 font-bold text-gray-900">
+                    {getProfessionLabel(result.voter.professional_category)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <p className="text-xs font-medium text-gray-400">Email address</p>
+                  <p className="mt-1 break-all font-semibold text-gray-900">{result.voter.email}</p>
+                </div>
+
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                  <p className="text-xs font-medium text-gray-400">Registration number</p>
+                  <p className="mt-1 font-bold text-gray-900">{result.voter.registration_number}</p>
+                </div>
+              </div>
+
+              {/* Temporary password */}
+              <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                    <KeyRound size={20} />
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold text-gray-900">Temporary login password</h3>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Securely share this password with the registered voter.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    id="temporary-password"
+                    type="text"
+                    readOnly
+                    value={result.temporaryPassword}
+                    autoComplete="off"
+                    className="min-w-0 flex-1 rounded-xl border border-amber-200 bg-white px-4 py-3 font-mono text-sm font-semibold tracking-wide text-gray-900 outline-none"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={copyTemporaryPassword}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:bg-gray-800"
+                  >
+                    <Copy size={16} />
+                    Copy password
+                  </button>
+                </div>
+
+                {copyMessage && (
+                  <p className="mt-3 text-sm font-medium text-gray-700" aria-live="polite">
+                    {copyMessage}
+                  </p>
+                )}
+
+                <div className="mt-4 flex items-start gap-2 text-xs leading-5 text-amber-800">
+                  <ShieldCheck size={15} className="mt-0.5 shrink-0" />
+                  <p>
+                    Do not share this password publicly or leave it visible on a shared screen. The
+                    voter must change their password at first login.
+                  </p>
+                </div>
+              </div>
 
               <button
                 type="button"
-                onClick={copyTemporaryPassword}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                onClick={resetRegistration}
+                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-sm font-bold text-[#111111] transition hover:bg-[#1fbd59] sm:w-auto"
               >
-                <Copy size={17} />
-                Copy password
+                <UserPlus size={18} />
+                Register another voter
               </button>
             </div>
-
-            {copyMessage && (
-              <p className="mt-2 text-sm text-gray-700" aria-live="polite">
-                {copyMessage}
-              </p>
-            )}
-
-            <p className="mt-3 text-xs leading-5 text-gray-600">
-              Deliver this password to the voter through a secure channel. Do not share it publicly
-              or leave it visible on a shared screen. The voter should change it at first login.
-            </p>
           </div>
+        ) : (
+          /* Full-width registration form */
+          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-100 px-6 py-6 sm:px-8">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#168a40]">
+                  <UserPlus size={21} />
+                </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setResult(null);
-              setCopyMessage('');
-              setError('');
-              setFormOpen(true);
-            }}
-            className="mt-5 text-sm font-semibold text-[#168a40] underline underline-offset-4"
-          >
-            Register another voter
-          </button>
-        </div>
-      )}
-    </section>
+                <div>
+                  <h2 className="font-bold text-[#111111]">Voter information</h2>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    Complete all required fields to register a voter.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8">
+              {error && (
+                <div
+                  role="alert"
+                  className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                >
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <RegisterForm
+                onSubmit={handleRegister}
+                onBack={() => setError('')}
+                loading={loading}
+                error=""
+              />
+            </div>
+
+            <div className="border-t border-gray-100 bg-gray-50/70 px-6 py-4 sm:px-8">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <ShieldCheck size={15} className="text-[#168a40]" />
+                  Voter information is handled securely.
+                </div>
+
+                <p className="text-xs text-gray-400">
+                  Supported professions: Doctors, Pharmacists and Dentists
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
