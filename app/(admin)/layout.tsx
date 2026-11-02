@@ -25,7 +25,7 @@ export default function VotingDashboardLayout({ children }: { children: React.Re
     },
     {
       href: '/dashboard/voters',
-      label: 'Voter Statistics',
+      label: 'Live Results',
       icon: Users2,
     },
   ];

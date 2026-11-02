@@ -182,23 +182,6 @@ export default function ElectionDetailsPage() {
   const [opensAt, setOpensAt] = useState('');
   const [closesAt, setClosesAt] = useState('');
 
-  const [ballotPositions, setBallotPositions] = useState<
-    Array<{
-      id: string;
-      name: string;
-      description?: string;
-      seatsAvailable?: number;
-      candidates: Array<{
-        id: string;
-        name: string;
-        manifesto?: string;
-        photoUrl?: string | null;
-      }>;
-    }>
-  >([]);
-
-  const [ballotMessage, setBallotMessage] = useState('');
-
   const loadElection = useCallback(async () => {
     const response = await fetch('/api/admin/elections', {
       cache: 'no-store',
@@ -591,44 +574,127 @@ export default function ElectionDetailsPage() {
     }
   }
 
-  async function loadBallotPreview() {
+  async function handleCloseElection() {
+    if (election?.status.toUpperCase() !== 'OPEN') {
+      setError('Only an open election can be closed.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to close this election?\n\n' +
+        'Closing the election will stop further voting. ' +
+        'This action cannot be undone from this page. ' +
+        'Results will remain unpublished until they are separately approved for publication.'
+    );
+
+    if (!confirmed) return;
+
     setError('');
-    setBallotMessage('');
-    setBusyAction('ballot');
+    setNotice('');
+    setBusyAction('close');
 
     try {
-      const response = await fetch(`/api/voting/elections/${electionId}/ballot`, {
-        cache: 'no-store',
+      const response = await fetch(`/api/admin/elections/${encodeURIComponent(electionId)}/close`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+        },
       });
 
       const data = await readResponse<{
-        positions?: Array<{
-          id: string;
-          name: string;
-          description?: string;
-          seatsAvailable?: number;
-          candidates?: Array<{
-            id: string;
-            name: string;
-            manifesto?: string;
-            photoUrl?: string | null;
-          }>;
-        }>;
+        election?: Partial<Election>;
       }>(response);
 
-      setBallotPositions(
-        (data.positions ?? []).map((position) => ({
-          ...position,
-          candidates: position.candidates ?? [],
-        }))
+      if (!data.election) {
+        throw new Error('The server did not return the updated election.');
+      }
+
+      setElection((current) =>
+        current
+          ? {
+              ...current,
+              ...data.election,
+              status: data.election?.status ?? 'CLOSED',
+              results_published: data.election?.results_published ?? false,
+            }
+          : current
       );
 
-      setBallotMessage('Ballot preview loaded from the voter-facing endpoint.');
+      setNotice(
+        'Election successfully closed. Voting is no longer available, and results remain unpublished.'
+      );
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Unable to load the ballot preview. Check that the ballot proxy route exists and that this user is authorised.'
+        err instanceof Error ? err.message : 'Unable to close the election. Please try again.'
+      );
+    } finally {
+      setBusyAction('');
+    }
+  }
+
+  async function handlePublishResults() {
+    const status = election?.status.toUpperCase();
+
+    if (!election || !['CLOSED', 'CERTIFIED'].includes(status ?? '')) {
+      setError('Only a closed or certified election can publish results.');
+      return;
+    }
+
+    if (election.results_published) {
+      setError('These election results have already been published.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to publish the results of this election?\n\n' +
+        'Once published, the election results will become available through the public results endpoint.'
+    );
+
+    if (!confirmed) return;
+
+    setError('');
+    setNotice('');
+    setBusyAction('publish-results');
+
+    try {
+      const response = await fetch(
+        `/api/admin/elections/${encodeURIComponent(election.id)}/publish-results`,
+        {
+          method: 'PATCH',
+          headers: {
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      const data = await readResponse<{
+        message?: string;
+        election?: {
+          id: string;
+          title: string;
+          status: string;
+          resultsPublished: boolean;
+        };
+      }>(response);
+
+      if (!data.election) {
+        throw new Error('The server did not return the updated election.');
+      }
+
+      setElection((current) =>
+        current
+          ? {
+              ...current,
+              status: data.election!.status,
+              results_published: data.election!.resultsPublished,
+            }
+          : current
+      );
+
+      setNotice(data.message || 'Election results published successfully.');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Unable to publish election results. Please try again.'
       );
     } finally {
       setBusyAction('');
@@ -871,13 +937,45 @@ export default function ElectionDetailsPage() {
                 Open election
               </button>
             )}
+            {election.status.toUpperCase() === 'OPEN' && (
+              <button
+                type="button"
+                onClick={() => void handleCloseElection()}
+                disabled={busyAction !== ''}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {busyAction === 'close' ? (
+                  <LoaderCircle className="animate-spin" size={16} />
+                ) : (
+                  <CircleAlert size={16} />
+                )}
+                Close election
+              </button>
+            )}
+            {['CLOSED', 'CERTIFIED'].includes(election.status.toUpperCase()) && (
+              <button
+                type="button"
+                onClick={() => void handlePublishResults()}
+                disabled={busyAction !== '' || election.results_published}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-[#111111] transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {busyAction === 'publish-results' ? (
+                  <LoaderCircle className="animate-spin" size={16} />
+                ) : (
+                  <ShieldCheck size={16} />
+                )}
+
+                {election.results_published ? 'Results published' : 'Publish results'}
+              </button>
+            )}
           </div>
         </form>
 
         {!['DRAFT', 'SCHEDULED'].includes(election.status.toUpperCase()) && (
           <p className="mt-4 text-xs leading-5 text-gray-500">
-            Scheduling controls are hidden for this status. Closing an election is not available
-            here because a closing endpoint has not yet been supplied.
+            {election.status.toUpperCase() === 'OPEN'
+              ? 'This election is currently accepting votes. You can close it when voting should end.'
+              : 'Scheduling controls are unavailable for this election status. Election closure and results publication are managed separately.'}
           </p>
         )}
       </section>
@@ -1264,66 +1362,6 @@ export default function ElectionDetailsPage() {
             </div>
           )}
         </div>
-      </section>
-
-      {/* Ballot preview */}
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm shadow-gray-100/70 sm:p-6">
-        <SectionHeading
-          icon={Vote}
-          title="Ballot preview"
-          description="Preview positions and candidates returned by the voter-facing ballot endpoint. Access depends on backend session and election rules."
-        />
-
-        <button
-          type="button"
-          onClick={() => void loadBallotPreview()}
-          disabled={busyAction === 'ballot'}
-          className={buttonSecondary}
-        >
-          {busyAction === 'ballot' ? (
-            <LoaderCircle className="animate-spin" size={16} />
-          ) : (
-            <FileText size={16} />
-          )}
-          Load ballot preview
-        </button>
-
-        {ballotMessage && <p className="mt-3 text-sm text-green-700">{ballotMessage}</p>}
-
-        {ballotPositions.length > 0 && (
-          <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {ballotPositions.map((position) => (
-              <div key={position.id} className="rounded-xl border border-gray-200 p-4">
-                <h3 className="font-semibold text-gray-900">{position.name}</h3>
-
-                {position.description && (
-                  <p className="mt-1 text-sm text-gray-500">{position.description}</p>
-                )}
-
-                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  Candidates ({position.candidates.length})
-                </p>
-
-                {position.candidates.length === 0 ? (
-                  <p className="mt-2 text-sm text-gray-500">No candidates returned.</p>
-                ) : (
-                  <div className="mt-3 space-y-3">
-                    {position.candidates.map((candidate) => (
-                      <div key={candidate.id} className="rounded-lg bg-gray-50 p-3">
-                        <p className="text-sm font-medium text-gray-900">{candidate.name}</p>
-                        {candidate.manifesto && (
-                          <p className="mt-1 text-sm leading-5 text-gray-600">
-                            {candidate.manifesto}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
       <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
